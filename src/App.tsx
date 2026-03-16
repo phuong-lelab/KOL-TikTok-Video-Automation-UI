@@ -62,7 +62,7 @@ const App: React.FC = () => {
     const files = e.target.files;
     if (!files) return;
 
-    console.log('📤 Starting upload for', files.length, 'file(s)...');
+    console.log('Starting upload for', files.length, 'file(s)...');
 
     for (const file of Array.from(files)) {
       const tempId = `temp-${Date.now()}-${Math.random()}`;
@@ -79,11 +79,11 @@ const App: React.FC = () => {
       setKolImages((prev) => [...prev, tempFile]);
 
       try {
-        console.log('📤 Uploading to Google Drive:', file.name);
+        console.log('Uploading to Google Drive:', file.name);
         
         const uploadResult = await n8nApi.uploadKolImage(file);
         
-        console.log('✅ Upload successful:', uploadResult.data);
+        console.log('Upload successful:', uploadResult.data);
 
         setKolImages((prev) =>
           prev.map((img) =>
@@ -135,7 +135,7 @@ const App: React.FC = () => {
     setIsGeneratingIntro(true);
 
     try {
-      console.log('🎨 Generating Intro Image...');
+      console.log('Generating Intro Image...');
       
       const result = await n8nApi.generateIntroImage({
         kolImageUrl: kolImage.driveUrl,
@@ -143,7 +143,7 @@ const App: React.FC = () => {
         kolImageDriveId: kolImage.driveId,
       });
 
-      console.log('✅ Intro Image generated:', result);
+      console.log('Intro Image generated:', result);
 
       if (result.success && result.data) {
         const imageUrl = result.data.viewLink;
@@ -185,7 +185,7 @@ const App: React.FC = () => {
     setIsGeneratingOutro(true);
 
     try {
-      console.log('🎨 Generating Outro Image...');
+      console.log('Generating Outro Image...');
       
       const result = await n8nApi.generateOutroImage({
         kolImageUrl: kolImage.driveUrl,
@@ -193,7 +193,7 @@ const App: React.FC = () => {
         kolImageDriveId: kolImage.driveId,
       });
 
-      console.log('✅ Outro Image generated:', result);
+      console.log('Outro Image generated:', result);
 
       if (result.success && result.data) {
         const imageUrl = result.data.viewLink;
@@ -269,39 +269,39 @@ const App: React.FC = () => {
     setIsValidating(true);
 
     try {
-      console.log('✅ Validating selected images (moving TEMP → VALIDATED)...');
+      console.log('Validating selected images (moving TEMP → VALIDATED)...');
 
       const selectedIntro = introGenerations[currentIntroIndex];
       const selectedOutro = outroGenerations[currentOutroIndex];
 
       if (selectedIntro.driveId) {
-        console.log('📤 Validating Intro image:', selectedIntro.driveId);
+        console.log('Validating Intro image:', selectedIntro.driveId);
         const introResult = await n8nApi.validateIntroImage(selectedIntro.driveId);
-        console.log('✅ Intro validated:', introResult);
+        console.log('Intro validated:', introResult);
         
         if (introResult.success && introResult.data) {
           setValidatedIntroId(introResult.data.validatedFileId);
-          alert(`✅ Intro image validated: ${introResult.data.validatedFileName}`);
+          alert(`Intro image validated: ${introResult.data.validatedFileName}`);
         }
       }
 
       if (selectedOutro.driveId) {
-        console.log('📤 Validating Outro image:', selectedOutro.driveId);
+        console.log('Validating Outro image:', selectedOutro.driveId);
         const outroResult = await n8nApi.validateOutroImage(selectedOutro.driveId);
-        console.log('✅ Outro validated:', outroResult);
+        console.log('Outro validated:', outroResult);
         
         if (outroResult.success && outroResult.data) {
           setValidatedOutroId(outroResult.data.validatedFileId);
-          alert(`✅ Outro image validated: ${outroResult.data.validatedFileName}`);
+          alert(`Outro image validated: ${outroResult.data.validatedFileName}`);
         }
       }
 
-      console.log('🎉 Both images validated successfully!');
-      alert('✅ Images validated! Proceeding to Video Generation...');
+      console.log('Both images validated successfully!');
+      alert('Images validated! Proceeding to Video Generation...');
       
       setCurrentStep(WorkflowStep.VIDEO_GEN);
     } catch (error) {
-      console.error('❌ Error validating images:', error);
+      console.error('Error validating images:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Validation failed'}`);
       
       const continueAnyway = confirm('Validation failed. Continue anyway?');
@@ -323,7 +323,7 @@ const App: React.FC = () => {
     setIsGeneratingIntroVideo(true);
 
     try {
-      console.log('🎬 Generating Intro Video...');
+      console.log('Generating Intro Video...');
       console.log('Using validated image ID:', validatedIntroId);
       
       const result = await n8nApi.generateIntroVideo({
@@ -332,7 +332,7 @@ const App: React.FC = () => {
         duration: 5,
       });
 
-      console.log('✅ Intro Video generated:', result);
+      console.log('Intro Video generated:', result);
 
       if (result.success && result.data) {
         const videoUrl = result.data.viewLink;
@@ -351,7 +351,7 @@ const App: React.FC = () => {
         setCurrentIntroVideoIndex(introVideos.length);
       }
     } catch (error) {
-      console.error('❌ Error generating intro video:', error);
+      console.error('Error generating intro video:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Video generation failed'}`);
     } finally {
       setIsGeneratingIntroVideo(false);
@@ -367,7 +367,7 @@ const App: React.FC = () => {
     setIsGeneratingOutroVideo(true);
 
     try {
-      console.log('🎬 Generating Outro Video...');
+      console.log('Generating Outro Video...');
       console.log('Using validated image ID:', validatedOutroId);
       
       const result = await n8nApi.generateOutroVideo({
@@ -376,7 +376,7 @@ const App: React.FC = () => {
         duration: 5,
       });
 
-      console.log('✅ Outro Video generated:', result);
+      console.log('Outro Video generated:', result);
 
       if (result.success && result.data) {
         const videoUrl = result.data.viewLink;
@@ -395,7 +395,7 @@ const App: React.FC = () => {
         setCurrentOutroVideoIndex(outroVideos.length);
       }
     } catch (error) {
-      console.error('❌ Error generating outro video:', error);
+      console.error('Error generating outro video:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Video generation failed'}`);
     } finally {
       setIsGeneratingOutroVideo(false);
@@ -809,7 +809,7 @@ const App: React.FC = () => {
                       : 'text-gray-500 hover:text-gray-300'
                   }`}
                 >
-                  🧪 Test Mode
+                  Test Mode
                   <span className="text-xs font-normal opacity-70">(example videos)</span>
                 </button>
 
@@ -818,7 +818,7 @@ const App: React.FC = () => {
                   title="Deactivated — enable sau khi Video Gen hoạt động"
                   className="px-6 py-3 rounded-xl font-semibold text-gray-600 cursor-not-allowed flex items-center gap-2 opacity-40"
                 >
-                  ⚡ Production
+                  Production
                   <span className="text-xs font-normal">(deactivated)</span>
                 </button>
               </div>
@@ -896,7 +896,7 @@ const App: React.FC = () => {
               {/* Mode info */}
               {assemblyMode === 'test' && (
                 <p className="text-xs text-yellow-500/70 mt-3 text-center">
-                  🧪 Test Mode: dùng intro/outro example từ Drive. Product videos lấy từ folder product.
+                  Test Mode: Use intro/outro example from Drive, product videos from the product folder.
                 </p>
               )}
             </div>
@@ -966,7 +966,7 @@ const App: React.FC = () => {
                     rel="noopener noreferrer"
                     className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 transition-all flex items-center gap-2"
                   >
-                    📥 Download Video
+                    Download Video
                   </a>
 
                   <a
@@ -975,7 +975,7 @@ const App: React.FC = () => {
                     rel="noopener noreferrer"
                     className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
                   >
-                    ☁️ View in Drive
+                    View in Drive
                   </a>
 
                   <button
@@ -988,7 +988,7 @@ const App: React.FC = () => {
                 </div>
 
                 <p className="text-xs text-gray-500 text-center mt-3">
-                  ✅ Video đã được lưu vào Google Drive: {assembledVideo.fileName}
+                  Video is saved in Google Drive: {assembledVideo.fileName}
                 </p>
               </div>
             )}
