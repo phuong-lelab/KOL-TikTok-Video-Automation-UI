@@ -766,7 +766,7 @@ const App: React.FC = () => {
                 className="px-6 py-3 rounded-xl border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 transition-all flex items-center gap-2 text-sm"
                 title="Bỏ qua Video Gen, vào thẳng Assembly để test"
               >
-                🧪 Skip → Assembly (Test)
+                Skip → Assembly (Test)
               </button>
 
               <button
