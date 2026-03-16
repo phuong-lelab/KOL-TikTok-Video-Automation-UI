@@ -1065,7 +1065,7 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
             <img 
               src={currentGen.url} 
               alt={title} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 console.error('Image load error:', currentGen.url);
               }}
