@@ -1151,7 +1151,7 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
           rel="noopener noreferrer"
           className="block mt-2 text-center text-xs text-gray-400 hover:text-white transition-colors"
         >
-          📥 Download from Google Drive
+          Download from Google Drive
         </a>
       )}
     </div>
