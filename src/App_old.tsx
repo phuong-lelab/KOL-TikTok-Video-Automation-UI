@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Image, Video, Sparkles, ArrowRight, RefreshCw, CheckCircle, Loader, ChevronLeft, ChevronRight, Trash2, CloudUpload } from 'lucide-react';
 import { UploadedFile, WorkflowStep } from './types';
-import { n8nApi } from './config_old';
+import { n8nApi } from './config';
 import { VideoGenerationBox } from './Components/VideoGeneration';
 
 // Generation interface
@@ -38,6 +38,16 @@ const App: React.FC = () => {
   const [isGeneratingOutroVideo, setIsGeneratingOutroVideo] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isValidatingVideos, setIsValidatingVideos] = useState(false);
+
+  // Assembly State
+  const [assemblyMode, setAssemblyMode] = useState<'test' | 'production'>('test');
+  const [isAssembling, setIsAssembling] = useState(false);
+  const [assembledVideo, setAssembledVideo] = useState<{
+    url: string;
+    downloadLink: string;
+    fileName: string;
+  } | null>(null);
+  const [assemblyError, setAssemblyError] = useState<string | null>(null);
   
   // Validation states
   const [validatedIntroId, setValidatedIntroId] = useState<string | null>(null);
@@ -52,7 +62,7 @@ const App: React.FC = () => {
     const files = e.target.files;
     if (!files) return;
 
-    console.log('📤 Starting upload for', files.length, 'file(s)...');
+    console.log('Starting upload for', files.length, 'file(s)...');
 
     for (const file of Array.from(files)) {
       const tempId = `temp-${Date.now()}-${Math.random()}`;
@@ -69,11 +79,11 @@ const App: React.FC = () => {
       setKolImages((prev) => [...prev, tempFile]);
 
       try {
-        console.log('📤 Uploading to Google Drive:', file.name);
+        console.log('Uploading to Google Drive:', file.name);
         
         const uploadResult = await n8nApi.uploadKolImage(file);
         
-        console.log('✅ Upload successful:', uploadResult.data);
+        console.log('Upload successful:', uploadResult.data);
 
         setKolImages((prev) =>
           prev.map((img) =>
@@ -125,7 +135,7 @@ const App: React.FC = () => {
     setIsGeneratingIntro(true);
 
     try {
-      console.log('🎨 Generating Intro Image...');
+      console.log('Generating Intro Image...');
       
       const result = await n8nApi.generateIntroImage({
         kolImageUrl: kolImage.driveUrl,
@@ -133,7 +143,7 @@ const App: React.FC = () => {
         kolImageDriveId: kolImage.driveId,
       });
 
-      console.log('✅ Intro Image generated:', result);
+      console.log('Intro Image generated:', result);
 
       if (result.success && result.data) {
         const imageUrl = result.data.viewLink;
@@ -175,7 +185,7 @@ const App: React.FC = () => {
     setIsGeneratingOutro(true);
 
     try {
-      console.log('🎨 Generating Outro Image...');
+      console.log('Generating Outro Image...');
       
       const result = await n8nApi.generateOutroImage({
         kolImageUrl: kolImage.driveUrl,
@@ -183,7 +193,7 @@ const App: React.FC = () => {
         kolImageDriveId: kolImage.driveId,
       });
 
-      console.log('✅ Outro Image generated:', result);
+      console.log('Outro Image generated:', result);
 
       if (result.success && result.data) {
         const imageUrl = result.data.viewLink;
@@ -259,39 +269,39 @@ const App: React.FC = () => {
     setIsValidating(true);
 
     try {
-      console.log('✅ Validating selected images (moving TEMP → VALIDATED)...');
+      console.log('Validating selected images (moving TEMP → VALIDATED)...');
 
       const selectedIntro = introGenerations[currentIntroIndex];
       const selectedOutro = outroGenerations[currentOutroIndex];
 
       if (selectedIntro.driveId) {
-        console.log('📤 Validating Intro image:', selectedIntro.driveId);
+        console.log('Validating Intro image:', selectedIntro.driveId);
         const introResult = await n8nApi.validateIntroImage(selectedIntro.driveId);
-        console.log('✅ Intro validated:', introResult);
+        console.log('Intro validated:', introResult);
         
         if (introResult.success && introResult.data) {
           setValidatedIntroId(introResult.data.validatedFileId);
-          alert(`✅ Intro image validated: ${introResult.data.validatedFileName}`);
+          alert(`Intro image validated: ${introResult.data.validatedFileName}`);
         }
       }
 
       if (selectedOutro.driveId) {
-        console.log('📤 Validating Outro image:', selectedOutro.driveId);
+        console.log('Validating Outro image:', selectedOutro.driveId);
         const outroResult = await n8nApi.validateOutroImage(selectedOutro.driveId);
-        console.log('✅ Outro validated:', outroResult);
+        console.log('Outro validated:', outroResult);
         
         if (outroResult.success && outroResult.data) {
           setValidatedOutroId(outroResult.data.validatedFileId);
-          alert(`✅ Outro image validated: ${outroResult.data.validatedFileName}`);
+          alert(`Outro image validated: ${outroResult.data.validatedFileName}`);
         }
       }
 
-      console.log('🎉 Both images validated successfully!');
-      alert('✅ Images validated! Proceeding to Video Generation...');
+      console.log('Both images validated successfully!');
+      alert('Images validated! Proceeding to Video Generation...');
       
       setCurrentStep(WorkflowStep.VIDEO_GEN);
     } catch (error) {
-      console.error('❌ Error validating images:', error);
+      console.error('Error validating images:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Validation failed'}`);
       
       const continueAnyway = confirm('Validation failed. Continue anyway?');
@@ -313,7 +323,7 @@ const App: React.FC = () => {
     setIsGeneratingIntroVideo(true);
 
     try {
-      console.log('🎬 Generating Intro Video...');
+      console.log('Generating Intro Video...');
       console.log('Using validated image ID:', validatedIntroId);
       
       const result = await n8nApi.generateIntroVideo({
@@ -322,7 +332,7 @@ const App: React.FC = () => {
         duration: 5,
       });
 
-      console.log('✅ Intro Video generated:', result);
+      console.log('Intro Video generated:', result);
 
       if (result.success && result.data) {
         const videoUrl = result.data.viewLink;
@@ -341,7 +351,7 @@ const App: React.FC = () => {
         setCurrentIntroVideoIndex(introVideos.length);
       }
     } catch (error) {
-      console.error('❌ Error generating intro video:', error);
+      console.error('Error generating intro video:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Video generation failed'}`);
     } finally {
       setIsGeneratingIntroVideo(false);
@@ -357,7 +367,7 @@ const App: React.FC = () => {
     setIsGeneratingOutroVideo(true);
 
     try {
-      console.log('🎬 Generating Outro Video...');
+      console.log('Generating Outro Video...');
       console.log('Using validated image ID:', validatedOutroId);
       
       const result = await n8nApi.generateOutroVideo({
@@ -366,7 +376,7 @@ const App: React.FC = () => {
         duration: 5,
       });
 
-      console.log('✅ Outro Video generated:', result);
+      console.log('Outro Video generated:', result);
 
       if (result.success && result.data) {
         const videoUrl = result.data.viewLink;
@@ -385,7 +395,7 @@ const App: React.FC = () => {
         setCurrentOutroVideoIndex(outroVideos.length);
       }
     } catch (error) {
-      console.error('❌ Error generating outro video:', error);
+      console.error('Error generating outro video:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Video generation failed'}`);
     } finally {
       setIsGeneratingOutroVideo(false);
@@ -473,6 +483,40 @@ const App: React.FC = () => {
       }
     } finally {
       setIsValidatingVideos(false);
+    }
+  };
+
+  // ==================== ASSEMBLY FUNCTIONS ====================
+  const handleAssembleVideo = async () => {
+    setIsAssembling(true);
+    setAssembledVideo(null);
+    setAssemblyError(null);
+
+    try {
+      console.log('🎬 Starting Assembly in mode:', assemblyMode);
+
+      const result = await n8nApi.assembleVideo({
+        mode: assemblyMode,
+        introVideoId: validatedIntroVideoId || undefined,
+        outroVideoId: validatedOutroVideoId || undefined,
+      });
+
+      console.log('✅ Assembly result:', result);
+
+      if (result.success && result.data) {
+        setAssembledVideo({
+          url: result.data.viewLink,
+          downloadLink: result.data.downloadLink,
+          fileName: result.data.fileName,
+        });
+      } else {
+        setAssemblyError('Assembly failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('❌ Assembly error:', error);
+      setAssemblyError(error instanceof Error ? error.message : 'Assembly failed');
+    } finally {
+      setIsAssembling(false);
     }
   };
 
@@ -716,6 +760,15 @@ const App: React.FC = () => {
                 Back
               </button>
 
+              {/* SKIP button: bypass guard để test Assembly */}
+              <button
+                onClick={() => setCurrentStep(WorkflowStep.ASSEMBLY)}
+                className="px-6 py-3 rounded-xl border border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 transition-all flex items-center gap-2 text-sm"
+                title="Bỏ qua Video Gen, vào thẳng Assembly để test"
+              >
+                Skip → Assembly (Test)
+              </button>
+
               <button
                 onClick={handleContinueToAssembly}
                 disabled={introVideos.length === 0 || outroVideos.length === 0 || isValidatingVideos}
@@ -739,16 +792,216 @@ const App: React.FC = () => {
 
         {/* STEP 4: ASSEMBLY */}
         {currentStep === WorkflowStep.ASSEMBLY && (
-          <div className="animate-fade-in text-center">
-            <h2 className="text-4xl font-bold gradient-text mb-4">Final Assembly</h2>
-            <p className="text-gray-400 mb-8">Coming soon...</p>
+          <div className="animate-fade-in">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-bold gradient-text mb-4">Final Assembly</h2>
+              <p className="text-gray-400">Ghép intro + product videos + outro thành video hoàn chỉnh</p>
+            </div>
 
-            <button
-              onClick={() => setCurrentStep(WorkflowStep.VIDEO_GEN)}
-              className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all"
-            >
-              Back
-            </button>
+            {/* Mode Selector */}
+            <div className="flex justify-center mb-8">
+              <div className="glass-panel rounded-2xl p-2 flex gap-2">
+                <button
+                  onClick={() => { setAssemblyMode('test'); setAssembledVideo(null); setAssemblyError(null); }}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                    assemblyMode === 'test'
+                      ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  Test Mode
+                  <span className="text-xs font-normal opacity-70">(example videos)</span>
+                </button>
+
+                <button
+                  disabled
+                  title="Deactivated — enable sau khi Video Gen hoạt động"
+                  className="px-6 py-3 rounded-xl font-semibold text-gray-600 cursor-not-allowed flex items-center gap-2 opacity-40"
+                >
+                  Production
+                  <span className="text-xs font-normal">(deactivated)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Video Lineup Preview */}
+            <div className="glass-panel rounded-2xl p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-300">Videos sẽ được ghép</h3>
+              <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                {/* Intro */}
+                <div className="flex-shrink-0 text-center">
+                  <div className="w-24 h-40 rounded-xl bg-purple-500/20 border-2 border-purple-500/40 flex flex-col items-center justify-center gap-2">
+                    <Video className="w-6 h-6 text-purple-400" />
+                    <span className="text-xs text-purple-300 font-medium">Intro</span>
+                    {assemblyMode === 'test' && (
+                      <span className="text-xs text-gray-500 px-1 text-center">example</span>
+                    )}
+                    {assemblyMode === 'production' && validatedIntroVideoId && (
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-gray-600 font-bold text-lg flex-shrink-0">+</div>
+
+                {/* Product Videos x4 */}
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="flex-shrink-0 text-center">
+                    <div className="w-24 h-40 rounded-xl bg-blue-500/20 border-2 border-blue-500/40 flex flex-col items-center justify-center gap-2">
+                      <Video className="w-6 h-6 text-blue-400" />
+                      <span className="text-xs text-blue-300 font-medium">Product {n}</span>
+                      <span className="text-xs text-gray-500">Drive</span>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="text-gray-600 font-bold text-lg flex-shrink-0">+</div>
+
+                {/* Outro */}
+                <div className="flex-shrink-0 text-center">
+                  <div className="w-24 h-40 rounded-xl bg-pink-500/20 border-2 border-pink-500/40 flex flex-col items-center justify-center gap-2">
+                    <Video className="w-6 h-6 text-pink-400" />
+                    <span className="text-xs text-pink-300 font-medium">Outro</span>
+                    {assemblyMode === 'test' && (
+                      <span className="text-xs text-gray-500 px-1 text-center">example</span>
+                    )}
+                    {assemblyMode === 'production' && validatedOutroVideoId && (
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Arrow → Result */}
+                <div className="text-gray-500 text-2xl flex-shrink-0">→</div>
+
+                {/* Final */}
+                <div className="flex-shrink-0 text-center">
+                  <div className={`w-24 h-40 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${
+                    assembledVideo
+                      ? 'bg-green-500/20 border-green-500/40'
+                      : 'bg-gray-800 border-dashed border-gray-600'
+                  }`}>
+                    {isAssembling ? (
+                      <Loader className="w-6 h-6 text-purple-400 animate-spin" />
+                    ) : assembledVideo ? (
+                      <CheckCircle className="w-6 h-6 text-green-400" />
+                    ) : (
+                      <Sparkles className="w-6 h-6 text-gray-600" />
+                    )}
+                    <span className="text-xs text-gray-400 font-medium">Final</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mode info */}
+              {assemblyMode === 'test' && (
+                <p className="text-xs text-yellow-500/70 mt-3 text-center">
+                  Test Mode: Use intro/outro example from Drive, product videos from the product folder.
+                </p>
+              )}
+            </div>
+
+            {/* Assemble Button */}
+            {!assembledVideo && (
+              <div className="flex justify-center mb-6">
+                <button
+                  onClick={handleAssembleVideo}
+                  disabled={isAssembling}
+                  className="px-10 py-5 rounded-xl font-bold text-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-3 shadow-lg shadow-purple-500/20"
+                >
+                  {isAssembling ? (
+                    <>
+                      <Loader className="w-6 h-6 animate-spin" />
+                      Assembling... (may take 1-2 min)
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-6 h-6" />
+                      Start Assembly
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Error State */}
+            {assemblyError && (
+              <div className="glass-panel rounded-2xl p-6 mb-6 border border-red-500/30">
+                <p className="text-red-400 text-center mb-4">❌ {assemblyError}</p>
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleAssembleVideo}
+                    className="px-6 py-3 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Retry Assembly
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Result */}
+            {assembledVideo && (
+              <div className="glass-panel rounded-2xl p-6 mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-400" />
+                  <h3 className="text-xl font-semibold text-green-400">Assembly Complete!</h3>
+                </div>
+
+                {/* Video Player */}
+                <div className="aspect-video rounded-xl overflow-hidden bg-black mb-4">
+                  <video
+                    src={assembledVideo.url}
+                    controls
+                    className="w-full h-full"
+                    playsInline
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap justify-center gap-3">
+                  <a
+                    href={assembledVideo.downloadLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 transition-all flex items-center gap-2"
+                  >
+                    Download Video
+                  </a>
+
+                  <a
+                    href={assembledVideo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
+                  >
+                    View in Drive
+                  </a>
+
+                  <button
+                    onClick={() => { setAssembledVideo(null); setAssemblyError(null); }}
+                    className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Re-assemble
+                  </button>
+                </div>
+
+                <p className="text-xs text-gray-500 text-center mt-3">
+                  Video is saved in Google Drive: {assembledVideo.fileName}
+                </p>
+              </div>
+            )}
+
+            {/* Nav */}
+            <div className="flex justify-center">
+              <button
+                onClick={() => setCurrentStep(WorkflowStep.VIDEO_GEN)}
+                className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all"
+              >
+                ← Back to Video Gen
+              </button>
+            </div>
           </div>
         )}
       </main>
@@ -812,7 +1065,7 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
             <img 
               src={currentGen.url} 
               alt={title} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 console.error('Image load error:', currentGen.url);
               }}
@@ -898,7 +1151,7 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
           rel="noopener noreferrer"
           className="block mt-2 text-center text-xs text-gray-400 hover:text-white transition-colors"
         >
-          📥 Download from Google Drive
+          Download from Google Drive
         </a>
       )}
     </div>
