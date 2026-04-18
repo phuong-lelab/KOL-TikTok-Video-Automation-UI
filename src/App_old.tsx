@@ -1053,9 +1053,9 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
         </div>
       </div>
 
-      <div className="aspect-video bg-gray-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-700 relative">
+      <div className="rounded-xl mb-4 border-2 border-dashed border-gray-700 relative overflow-hidden bg-gray-900">
         {isGenerating ? (
-          <div className="text-center">
+          <div className="text-center py-16">
             <Loader className="w-12 h-12 mx-auto mb-3 text-purple-400 animate-spin" />
             <p className="text-gray-400">Generating with Gemini AI...</p>
             <p className="text-xs text-gray-500 mt-2">This may take 10-30 seconds</p>
@@ -1065,7 +1065,7 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
             <img 
               src={currentGen.url} 
               alt={title} 
-              className="w-full h-full object-contain"
+              className="w-full h-auto block"
               onError={(e) => {
                 console.error('Image load error:', currentGen.url);
               }}
@@ -1099,7 +1099,7 @@ const GenerationBox: React.FC<GenerationBoxProps> = ({
             </button>
           </>
         ) : (
-          <div className="text-center">
+          <div className="text-center py-16">
             <Image className="w-12 h-12 mx-auto mb-3 text-gray-600" />
             <p className="text-gray-500">Ready to generate</p>
           </div>

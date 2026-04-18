@@ -1,5 +1,5 @@
 import React from 'react';
-import { Video, Loader, RefreshCw, Sparkles, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Video, Loader, RefreshCw, Sparkles, ChevronLeft, ChevronRight, Trash2, CheckCircle } from 'lucide-react';
 
 interface Generation {
   id: string;
@@ -38,21 +38,6 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
   const currentGen = generations[currentIndex];
   const hasMultiple = generations.length > 1;
 
-  // Fix: Google Drive webViewLink không embed được trực tiếp.
-  // Dùng direct download link để video player load được.
-  const getPlayableUrl = (url: string, driveId?: string): string => {
-    if (!url) return '';
-    // Nếu là Drive view link → chuyển sang direct download
-    if (url.includes('drive.google.com/file/d/')) {
-      const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if (match) {
-        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-      }
-    }
-    // Nếu đã là download link hoặc fal.ai URL → dùng trực tiếp
-    return url;
-  };
-
   return (
     <div className="glass-panel hover-beam rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
@@ -69,37 +54,28 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
             )}
           </div>
         </div>
+      </div>
 
-      {/* Video Player */}
       <div className="aspect-video bg-gray-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-700 relative">
         {isGenerating ? (
           <div className="text-center">
             <Loader className="w-12 h-12 mx-auto mb-3 text-purple-400 animate-spin" />
-            <p className="text-gray-400">Generating video with Kling AI...</p>
+            <p className="text-gray-400">Generating video with Veo 3...</p>
             <p className="text-xs text-gray-500 mt-2">This may take 1-3 minutes</p>
           </div>
         ) : currentGen ? (
           <>
             <video
-              key={currentGen.id}
+              src={currentGen.url}
               className="w-full h-full object-cover"
               controls
-              playsInline
-              preload="auto"
-            >
-              <source
-                src={getPlayableUrl(currentGen.url, currentGen.driveId)}
-                type="video/mp4"
-              />
-              {/* Fallback: nếu URL trên không load được */}
-              {currentGen.downloadLink && (
-                <source
-                  src={currentGen.downloadLink}
-                  type="video/mp4"
-                />
-              )}
-              Your browser does not support the video tag.
-            </video>
+              autoPlay
+              loop
+              muted
+              onError={(e) => {
+                console.error('Video load error:', currentGen.url);
+              }}
+            />
 
             {hasMultiple && (
               <>
@@ -142,7 +118,6 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
         )}
       </div>
 
-      {/* Dot indicators */}
       {generations.length > 0 && (
         <div className="flex justify-center gap-2 mb-4">
           {generations.map((_, idx) => (
@@ -156,9 +131,7 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
         </div>
       )}
 
-      {/* Action buttons */}
       <div className="flex gap-3">
-        {/* Generate button */}
         <button
           onClick={onGenerate}
           disabled={isGenerating || !validatedImageId}
@@ -172,7 +145,7 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
           ) : currentGen ? (
             <>
               <RefreshCw className="w-5 h-5" />
-              Regenerate
+              Generate New
             </>
           ) : (
             <>
@@ -181,33 +154,17 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
             </>
           )}
         </button>
-
       </div>
 
-      {/* Drive link fallback */}
-      {currentGen && (
-        <div className="mt-2 flex justify-center gap-4">
-          {currentGen.downloadLink && (
-            <a
-              href={currentGen.downloadLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:text-white transition-colors"
-            >
-              📥 Download
-            </a>
-          )}
-          {currentGen.driveId && (
-            <a
-              href={`https://drive.google.com/file/d/${currentGen.driveId}/view`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:text-white transition-colors"
-            >
-              🔗 Open in Drive
-            </a>
-          )}
-        </div>
+      {currentGen && currentGen.downloadLink && (
+        <a
+          href={currentGen.downloadLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-2 text-center text-xs text-gray-400 hover:text-white transition-colors"
+        >
+          📥 Download from Google Drive
+        </a>
       )}
     </div>
   );
