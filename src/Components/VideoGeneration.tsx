@@ -1,5 +1,5 @@
 import React from 'react';
-import { Video, Loader, RefreshCw, Sparkles, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Video, Loader, RefreshCw, Sparkles, ChevronLeft, ChevronRight, Trash2, CheckCircle } from 'lucide-react';
 
 interface Generation {
   id: string;
@@ -67,6 +67,7 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
                 Generation {currentIndex + 1} of {generations.length}
               </p>
             )}
+          </div>
           </div>
         </div>
 
