@@ -83,7 +83,7 @@ export const VideoGenerationBox: React.FC<VideoGenerationBoxProps> = ({
           <>
             <video
               key={currentGen.id}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain bg-black"
               controls
               playsInline
               preload="auto"
